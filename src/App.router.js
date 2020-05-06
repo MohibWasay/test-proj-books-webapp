@@ -7,7 +7,7 @@ import {
 } from 'react-router-dom';
 
 import BooksListing from './pages/Books/Listing';
-import BooksPreview from './pages/Books/Preview';
+import BooksPreview from './pages/Books/Manage';
 import CreateNewBook from './pages/Books/Manage';
 
 function AppRouter() {

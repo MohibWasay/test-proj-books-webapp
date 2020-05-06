@@ -13,7 +13,7 @@ import {
 } from '@material-ui/core';
 
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
-import { useHistory } from 'react-router';
+import { useHistory, useParams } from 'react-router';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -33,6 +33,7 @@ const useStyles = makeStyles((theme) => ({
 export default (props) => {
   const classes = useStyles();
   const history = useHistory();
+  const { id } = useParams();
 
   const [form, setForm] = React.useState({
     book: '',
@@ -47,13 +48,34 @@ export default (props) => {
 
   const onSubmit = (event) => {
     event.preventDefault();
-    api.createBook({
+    const content = {
       ...form,
-      publishedOn: form
-        .publishedOn
-        .toISOString()
-    })
+      publishedOn: form.publishedOn.toISOString()
+    };
+
+    if (id) {
+      return api.updateBook(id, content)
+        .then()
+    }
+    
+    return api.createBook(content)
     .then(() => history.push('/books'));
+  }
+
+  React.useEffect(() => {
+    if (id) {
+      api.getBookById(id)
+        .then(({ data }) => 
+          setForm({
+            ...data,
+            publishedOn: new Date(data.publishedOn)
+          })
+        );
+    }
+  }, [id]);
+
+  if (id && !form.book) {
+    return null;
   }
 
   return (
@@ -63,7 +85,7 @@ export default (props) => {
           <Typography variant="h6" id="tableTitle" component="div">
             Create Book
           </Typography>
-          <Grid container spacing={3}>
+          <Grid style={{ paddingTop: 30 }} container spacing={3}>
             <Grid item lg={3} md={3}>
               <TextField
                 id="book"
@@ -110,7 +132,10 @@ export default (props) => {
             </Grid>
             <Grid item lg={3} md={3}>
               <Button type="submit" variant="contained" color="primary">
-                Create New Book
+                Submit
+              </Button>
+              <Button onClick={() => history.push('/books')} type="button" variant="contained">
+                Cancel
               </Button>
             </Grid>
           </Grid>

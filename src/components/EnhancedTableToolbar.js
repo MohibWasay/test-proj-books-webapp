@@ -60,7 +60,7 @@ export default function EnhancedTableToolbar(props) {
       }
       {numSelected > 0 && (
         <Tooltip title="Delete">
-          <IconButton aria-label="delete">
+          <IconButton onClick={props.onClickRemove} aria-label="delete">
             <DeleteIcon />
           </IconButton>
         </Tooltip>

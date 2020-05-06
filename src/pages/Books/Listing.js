@@ -10,6 +10,9 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import Checkbox from '@material-ui/core/Checkbox';
 
+import IconButton from '@material-ui/core/IconButton';
+import PencilIcon from '@material-ui/icons/Edit';
+
 import EnhancedTableHead from '../../components/EnhancedTableHead';
 import EnhancedTableToolbar from '../../components/EnhancedTableToolbar';
 import api from '../../services/api';
@@ -101,12 +104,24 @@ export default function BooksListing() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = data.map((n) => n.name);
+      const newSelecteds = data.map((n) => n.id);
       setSelected(newSelecteds);
       return;
     }
     setSelected([]);
   };
+
+  const onClickRemove = () => {
+    Promise.all(selected.map(api.removeBook))
+      .then(() => {
+        setData(
+          data.filter(item => {
+            return !selected.includes(item.id);
+          })
+        );
+      })
+      .then(() => setSelected([]));
+  }
 
   const handleClick = (event, name) => {
     const selectedIndex = selected.indexOf(name);
@@ -147,7 +162,7 @@ export default function BooksListing() {
         </Button>
       </Paper>
       <Paper className={classes.paper}>
-        <EnhancedTableToolbar numSelected={selected.length} />
+        <EnhancedTableToolbar onClickRemove={onClickRemove} numSelected={selected.length} />
         <TableContainer>
           <Table
             className={classes.table}
@@ -168,13 +183,12 @@ export default function BooksListing() {
             <TableBody>
               {data
                 .map((row, index) => {
-                  const isItemSelected = isSelected(row.name);
+                  const isItemSelected = isSelected(row.id);
                   const labelId = `enhanced-table-checkbox-${index}`;
 
                   return (
                     <TableRow
                       hover
-                      onClick={(event) => handleClick(event, row.name)}
                       role="checkbox"
                       aria-checked={isItemSelected}
                       tabIndex={-1}
@@ -185,13 +199,18 @@ export default function BooksListing() {
                         <Checkbox
                           checked={isItemSelected}
                           inputProps={{ 'aria-labelledby': labelId }}
+                          onClick={(event) => handleClick(event, row.id)}
                         />
                       </TableCell>
                       <TableCell align="left">{row.book}</TableCell>
                       <TableCell align="center">{row.author}</TableCell>
                       <TableCell align="center">{row.publisher}</TableCell>
                       <TableCell align="center">{format(new Date(row.publishedOn), 'MMMM dd yyyy')}</TableCell>
-                      <TableCell align="center">{row.protein}</TableCell>
+                      <TableCell align="center">
+                        <IconButton onClick={() => history.push('/book/' + row.id)} aria-label="delete">
+                          <PencilIcon />
+                        </IconButton>  
+                      </TableCell>
                     </TableRow>
                   );
                 })}
